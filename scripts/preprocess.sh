@@ -2,15 +2,10 @@
 
 # Author: Wei-Ning Hsu
 
+source /disk/scratch1/ramons/myenvs/p3_dave/bin/activate
 
 python dump_hdf5_dataset.py \
-  "./filelist/train_original_with_alignments.json" \
-  "./data/PlacesEnglish400kTrainHDF5.json" \
-  "./data/PlacesEnglish400kTrain_audio.hdf5" \
-  "./data/PlacesEnglish400kTrain_image.hdf5"
-
-python dump_hdf5_dataset.py \
-  "./filelist/val_original_with_alignments.json" \
-  "./data/PlacesEnglish400kValHDF5.json" \
-  "./data/PlacesEnglish400kVal_audio.hdf5" \
-  "./data/PlacesEnglish400kVal_image.hdf5"
+  "/disk/scratch1/ramons/image_seg/data/facc/facc_dev.json" \
+  "./data/facc_dev.json" \
+  "./data/facc_audio_dev.hdf5" \
+  "./data/facc_image_dev.hdf5" 

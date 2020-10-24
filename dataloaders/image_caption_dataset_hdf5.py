@@ -53,19 +53,21 @@ class ImageCaptionDatasetHDF5(Dataset):
         RGB_std = self.image_conf.get('RGB_std', [0.229, 0.224, 0.225])
         self.image_normalize = transforms.Normalize(mean=RGB_mean, std=RGB_std)
 
+
     def _LoadAudio(self, index):
         if self.audios is None:
             print('Loading audio from %s' % self.audio_hdf5_path)
             self.audios = h5py.File(self.audio_hdf5_path, 'r')
         n_frames = self.audios['melspec_len'][index]
         logspec = self.audios['melspec'][index]
+        wav_id = self.audios['wav_id'][index]
         logspec = torch.FloatTensor(logspec)
         if self.audio_conf.get('normalize', False):
             mean = logspec[:, 0:n_frames].mean()
             std = logspec[:, 0:n_frames].std()
             logspec[:, 0:n_frames].add_(-mean)
             logspec[:, 0:n_frames].div_(std)
-        return logspec, n_frames
+        return logspec, n_frames, wav_id
 
     def _LoadImage(self, index):
         if self.images is None:
@@ -84,9 +86,9 @@ class ImageCaptionDatasetHDF5(Dataset):
         audio is a FloatTensor of size (N_freq, N_frames) 
         nframes is an integer
         """
-        audio, nframes = self._LoadAudio(index)
+        audio, nframes, wav_id = self._LoadAudio(index)
         image = self._LoadImage(index)
-        return image, audio, nframes
+        return image, audio, nframes, wav_id
 
     def __len__(self):
         return self.n_samples

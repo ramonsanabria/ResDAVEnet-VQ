@@ -23,10 +23,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Dataset Utils #
 #################
 def get_inp_feat(dataset, index):
-    mels, nframes = dataset._LoadAudio(index)
+    mels, nframes, wav_id = dataset._LoadAudio(index)
     mels = mels[:, :nframes]
     # print('FEAT : idx=%d, mel=%s, nframes=%s' % (index, mels.size(), nframes))
-    return mels, nframes
+    return mels, nframes, wav_id
 
 
 def get_word_ali(json_data, index):
@@ -51,10 +51,10 @@ def get_word_ali(json_data, index):
 
 
 def get_code_ali(audio_model, layer, dataset, index, device):
-    mels, _ = get_inp_feat(dataset, index)
+    mels, _, wav_id = get_inp_feat(dataset, index)
     _, _, codes, spf = get_feats_codes(audio_model, layer, mels, device)
     code_list = codes.detach().cpu().tolist()
-    return DenseAlignment(code_list, spf)
+    return DenseAlignment(code_list, spf), wav_id
 
 
 ###########################
@@ -68,8 +68,10 @@ def prepare_data(audio_model, layer, dataset, json_data, max_n_utts):
     
     t0 = time.time()
     for utt_index in range(n_utts):
-        utt2codes[utt_index] = get_code_ali(audio_model, layer, dataset,
-                                            utt_index, device)
+        code_ali, wav_id = get_code_ali(audio_model, layer, dataset, utt_index, device)
+
+        utt2codes[utt_index] = code_ali
+
         utt2words[utt_index] = get_word_ali(json_data, utt_index)
         tot_nframes += len(utt2codes[utt_index])
         if (utt_index+1) % 1000 == 0:

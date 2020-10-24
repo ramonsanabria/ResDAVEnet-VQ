@@ -1,5 +1,6 @@
 # Author: Wei-Ning Hsu
 import h5py
+import sys
 import json
 import librosa
 import numpy as np
@@ -75,6 +76,9 @@ def run_audio(data, audio_base, audio_path, audio_conf):
                       audio_conf['target_length'])
     dset_mel = f.create_dataset('melspec', dset_mel_shape, dtype='f')
     dset_len = f.create_dataset('melspec_len', (n,), dtype='i8')
+    single_str = np.string_('3523474077_16e14bc54c_1.wav')
+    dset_id = f.create_dataset('wav_id', (n,), dtype=single_str.dtype)
+
 
     start = time.time()
     for i, d in enumerate(data):
@@ -82,6 +86,7 @@ def run_audio(data, audio_base, audio_path, audio_conf):
         logspec, n_frames = compute_spectrogram(y, sr, audio_conf)
         dset_mel[i, :, :] = logspec
         dset_len[i] = n_frames
+        dset_id[i] = np.string_(d['wav'])
 
         if i % 100 == 0:
             t = time.time() - start
